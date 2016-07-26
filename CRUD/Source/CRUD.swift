@@ -28,7 +28,7 @@ private struct Parameters: Encodable {
 	}
 	
 	func toJSON() -> Gloss.JSON? {
-		var json = jsonify([
+		let json = jsonify([
 				"limit" ~~> limit,
 				"offset" ~~> offset,
 				"order_by" ~~> sortedBy
