@@ -31,18 +31,18 @@ public enum Error: ErrorType, Decodable {
 		self = .custom(code: error.code, domain: error.domain, message: error.localizedDescription)
 	}
 	
-	var domain: String {
+	public var domain: String {
 		switch self {
 		case .server:
 			return defaultConfiguration.serverDomain
 		case let .custom(_, domain, _):
 			return domain
 		default:
-			return Error.AppDomain
+			return Error.appDomain
 		}
 	}
 	
-	var code: Int {
+	public var code: Int {
 		switch self {
 		case let .server(code, _):
 			return code
@@ -61,7 +61,7 @@ public enum Error: ErrorType, Decodable {
 		}
 	}
 	
-	var message: String {
+	public var message: String {
 		switch self {
 		case let .server(_, message):
 			return message
@@ -80,7 +80,7 @@ public enum Error: ErrorType, Decodable {
 		}
 	}
 	
-	static var AppDomain: String {
+	private static var appDomain: String {
 		if let bundleIdentifier = NSBundle.mainBundle().bundleIdentifier {
 			return bundleIdentifier
 		} else {
