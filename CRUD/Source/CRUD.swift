@@ -45,9 +45,9 @@ private struct Parameters: Encodable {
 	}
 }
 
-struct CRUDConfiguration {
-	var baseURL = ""
-	var serverDomain = ""
+public struct CRUDConfiguration {
+	public var baseURL = ""
+	public var serverDomain = ""
 	
 	private var url: NSURL? {
 		guard let url = NSURL(string: baseURL) else { return nil }
@@ -71,7 +71,7 @@ struct CRUDConfiguration {
 	}
 }
 
-var defaultConfiguration: CRUDConfiguration = {
+public var defaultConfiguration: CRUDConfiguration = {
 	return CRUDConfiguration()
 }()
 
