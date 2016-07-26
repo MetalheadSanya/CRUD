@@ -1,0 +1,9 @@
+[submodule "Carthage/Checkouts/Alamofire"]
+	path = Carthage/Checkouts/Alamofire
+	url = https://github.com/Alamofire/Alamofire.git
+[submodule "Carthage/Checkouts/Gloss"]
+	path = Carthage/Checkouts/Gloss
+	url = https://github.com/hkellaway/Gloss.git
+[submodule "Carthage/Checkouts/When"]
+	path = Carthage/Checkouts/When
+	url = https://github.com/vadymmarkov/When.git

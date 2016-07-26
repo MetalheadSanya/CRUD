@@ -7,9 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0FB3213D1D47183B00B91F9C /* CRUD.h in Headers */ = {isa = PBXBuildFile; fileRef = 0FB3213C1D47183B00B91F9C /* CRUD.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0FB321441D47183B00B91F9C /* CRUD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FB321391D47183B00B91F9C /* CRUD.framework */; };
 		0FB321491D47183B00B91F9C /* CRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FB321481D47183B00B91F9C /* CRUDTests.swift */; };
+		0FB321561D4718B000B91F9C /* CRUD.h in Headers */ = {isa = PBXBuildFile; fileRef = 0FB321541D4718B000B91F9C /* CRUD.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0FB321571D4718B000B91F9C /* CRUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FB321551D4718B000B91F9C /* CRUD.swift */; };
+		0FB321591D471D6900B91F9C /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FB321581D471D6900B91F9C /* Alamofire.framework */; };
+		0FB3215B1D471D7400B91F9C /* Gloss.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FB3215A1D471D7400B91F9C /* Gloss.framework */; };
+		0FB3215D1D471D7800B91F9C /* When.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FB3215C1D471D7800B91F9C /* When.framework */; };
+		0FB321601D471E7100B91F9C /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FB3215F1D471E7100B91F9C /* Error.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,11 +29,16 @@
 
 /* Begin PBXFileReference section */
 		0FB321391D47183B00B91F9C /* CRUD.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CRUD.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		0FB3213C1D47183B00B91F9C /* CRUD.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CRUD.h; sourceTree = "<group>"; };
 		0FB3213E1D47183B00B91F9C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0FB321431D47183B00B91F9C /* CRUDTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CRUDTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FB321481D47183B00B91F9C /* CRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRUDTests.swift; sourceTree = "<group>"; };
 		0FB3214A1D47183B00B91F9C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0FB321541D4718B000B91F9C /* CRUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CRUD.h; sourceTree = "<group>"; };
+		0FB321551D4718B000B91F9C /* CRUD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CRUD.swift; sourceTree = "<group>"; };
+		0FB321581D471D6900B91F9C /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = "Carthage/Checkouts/Alamofire/build/Debug-iphoneos/Alamofire.framework"; sourceTree = "<group>"; };
+		0FB3215A1D471D7400B91F9C /* Gloss.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Gloss.framework; path = "Carthage/Checkouts/Gloss/build/Debug-iphoneos/Gloss.framework"; sourceTree = "<group>"; };
+		0FB3215C1D471D7800B91F9C /* When.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = When.framework; path = "Carthage/Checkouts/When/build/Debug-iphoneos/When.framework"; sourceTree = "<group>"; };
+		0FB3215F1D471E7100B91F9C /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +46,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0FB3215D1D471D7800B91F9C /* When.framework in Frameworks */,
+				0FB3215B1D471D7400B91F9C /* Gloss.framework in Frameworks */,
+				0FB321591D471D6900B91F9C /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +66,7 @@
 		0FB3212F1D47183B00B91F9C = {
 			isa = PBXGroup;
 			children = (
+				0FB3215E1D471DA900B91F9C /* Frameworks */,
 				0FB3213B1D47183B00B91F9C /* CRUD */,
 				0FB321471D47183B00B91F9C /* CRUDTests */,
 				0FB3213A1D47183B00B91F9C /* Products */,
@@ -71,7 +85,7 @@
 		0FB3213B1D47183B00B91F9C /* CRUD */ = {
 			isa = PBXGroup;
 			children = (
-				0FB3213C1D47183B00B91F9C /* CRUD.h */,
+				0FB321531D4718B000B91F9C /* Source */,
 				0FB3213E1D47183B00B91F9C /* Info.plist */,
 			);
 			path = CRUD;
@@ -86,6 +100,26 @@
 			path = CRUDTests;
 			sourceTree = "<group>";
 		};
+		0FB321531D4718B000B91F9C /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				0FB321541D4718B000B91F9C /* CRUD.h */,
+				0FB321551D4718B000B91F9C /* CRUD.swift */,
+				0FB3215F1D471E7100B91F9C /* Error.swift */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		0FB3215E1D471DA900B91F9C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0FB3215C1D471D7800B91F9C /* When.framework */,
+				0FB3215A1D471D7400B91F9C /* Gloss.framework */,
+				0FB321581D471D6900B91F9C /* Alamofire.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -93,7 +127,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0FB3213D1D47183B00B91F9C /* CRUD.h in Headers */,
+				0FB321561D4718B000B91F9C /* CRUD.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,6 +228,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0FB321601D471E7100B91F9C /* Error.swift in Sources */,
+				0FB321571D4718B000B91F9C /* CRUD.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,10 +350,12 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = CRUD/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = alexander.zalutskiy.CRUD;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alexanderZalutskiy.CRUD;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -330,10 +368,12 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = CRUD/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = alexander.zalutskiy.CRUD;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alexanderZalutskiy.CRUD;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -378,6 +418,7 @@
 				0FB3214F1D47183B00B91F9C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0FB321501D47183B00B91F9C /* Build configuration list for PBXNativeTarget "CRUDTests" */ = {
 			isa = XCConfigurationList;
@@ -386,6 +427,7 @@
 				0FB321521D47183B00B91F9C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
