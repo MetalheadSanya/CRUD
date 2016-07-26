@@ -1,0 +1,3 @@
+github "vadymmarkov/When"
+github "hkellaway/Gloss" ~> 0.7
+github "Alamofire/Alamofire" ~> 3.4
