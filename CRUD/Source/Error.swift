@@ -13,7 +13,7 @@ public enum Error: ErrorType, Decodable {
 	case incorrectURI
 	case objectDoesNotExist
 	case objectAlreadyExist
-	case uncorrectJsonStruct
+	case incorrectJsonStruct
 	case emptyData
 	case server(code: Int, message: String)
 	case custom(code: Int, domain: String, message: String)
@@ -48,7 +48,7 @@ public enum Error: ErrorType, Decodable {
 			return code
 		case let .custom(code, _, _):
 			return code
-		case .uncorrectJsonStruct:
+		case .incorrectJsonStruct:
 			return 1001
 		case .emptyData:
 			return 1002
@@ -67,8 +67,8 @@ public enum Error: ErrorType, Decodable {
 			return message
 		case let .custom(_, _, message):
 			return message
-		case .uncorrectJsonStruct:
-			return "Uncorrect Json structure"
+		case .incorrectJsonStruct:
+			return "Incorrect JSON structure"
 		case .emptyData:
 			return "Empty response body from server"
 		case .incorrectURI:

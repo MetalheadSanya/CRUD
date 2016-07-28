@@ -293,7 +293,8 @@ public func update<T:CRUDModel>(object: T) -> Promise<T> {
 	guard let request = defaultConfiguration.defaultRequestWithPath(
 			path,
 			method: .PATCH,
-			parameters: object.toJSON()) else {
+			parameters: object.toJSON(),
+			encoder: .JSON) else {
 		promise.reject(Error.incorrectURI); return promise
 	}
 	
@@ -319,7 +320,8 @@ public func create<T:CRUDModel>(object: T) -> Promise<T> {
 	guard let request = defaultConfiguration.defaultRequestWithPath(
 			T.path,
 			method: .POST,
-			parameters: object.toJSON()) else {
+			parameters: object.toJSON(),
+			encoder: .JSON) else {
 		promise.reject(Error.incorrectURI); return promise
 	}
 	
