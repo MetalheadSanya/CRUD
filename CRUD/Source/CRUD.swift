@@ -362,7 +362,7 @@ private func simpleResponse(
 		}
 		
 		if !onSuccess(data) {
-			onError?(.uncorrectJsonStruct)
+			onError?(.incorrectJsonStruct)
 		}
 	}
 }
