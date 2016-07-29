@@ -49,6 +49,8 @@ public struct CRUDConfiguration {
 	public var baseURL = ""
 	public var serverDomain = ""
 	
+	public var customHeaders: (() -> [String: String])? = nil
+	
 	private var url: NSURL? {
 		guard let url = NSURL(string: baseURL) else { return nil }
 		return url
@@ -67,6 +69,14 @@ public struct CRUDConfiguration {
 		let request = NSMutableURLRequest(URL: modelURL)
 		
 		request.HTTPMethod = method.rawValue
+		
+		if let customHeaders = customHeaders {
+			customHeaders().forEach {
+				key, value in
+				request.addValue(value, forHTTPHeaderField: key)
+			}
+		}
+		
 		return encoder.encode(request, parameters: parameters).0
 	}
 }
@@ -256,7 +266,11 @@ public func all<T:CRUDModel>(limit limit: Int? = nil,
 public func destroy<T:CRUDModel>(object: T) -> Promise<T?> {
 	let promise = Promise<T?>()
 	
-	let path = T.path + "/\(object.id)"
+	guard let id = object.id else {
+		promise.reject(Error.objectDoesNotExist); return promise
+	}
+	
+	let path = T.path + "/\(id)"
 	
 	guard let request = defaultConfiguration.defaultRequestWithPath(
 			path, method: .DELETE) else {
@@ -281,7 +295,7 @@ public func save<T:CRUDModel>(object: T) -> Promise<T> {
 	else { return create(object) }
 }
 
-public func update<T:CRUDModel>(object: T) -> Promise<T> {
+public func update<T:CRUDModel>(object: T, oldObject: T? = nil) -> Promise<T> {
 	let promise = Promise<T>()
 	
 	guard let id = object.id else {
@@ -290,10 +304,35 @@ public func update<T:CRUDModel>(object: T) -> Promise<T> {
 	
 	let path = T.path + "/\(id)"
 	
+	let parameters: JSON?
+	if let objectJSON = object.toJSON(), oldObjectJSON = oldObject?.toJSON() {
+		var tempParameters: JSON = [:]
+		
+		oldObjectJSON.forEach {
+			key, value in
+			if objectJSON[key] == nil {
+				tempParameters[key] = NSNull()
+			} else if objectJSON[key]?.isEqual(value) != true {
+				tempParameters[key] = objectJSON[key]
+			}
+		}
+		
+		objectJSON.forEach {
+			key, value in
+			if oldObjectJSON[key] == nil {
+				tempParameters[key] = value
+			}
+		}
+		
+		parameters = tempParameters
+	} else {
+		parameters = object.toJSON()
+	}
+	
 	guard let request = defaultConfiguration.defaultRequestWithPath(
 			path,
-			method: .PATCH,
-			parameters: object.toJSON(),
+			method: oldObject == nil ? .PUT : .PATCH,
+			parameters: parameters,
 			encoder: .JSON) else {
 		promise.reject(Error.incorrectURI); return promise
 	}
@@ -325,7 +364,11 @@ public func create<T:CRUDModel>(object: T) -> Promise<T> {
 		promise.reject(Error.incorrectURI); return promise
 	}
 	
-	Alamofire.request(request).responseJSON(completionHandler: objectResponse(
+	let r = Alamofire.request(request)
+	
+	debugPrint(r)
+	
+	r.responseJSON(completionHandler: objectResponse(
 			onSuccess: {
 				(object: T) in
 				promise.resolve(object)
