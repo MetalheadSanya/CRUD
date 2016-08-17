@@ -28,20 +28,13 @@ private struct Parameters: Encodable {
 	}
 	
 	func toJSON() -> Gloss.JSON? {
-		let json = jsonify([
+		return jsonify([
 				"limit" ~~> limit,
 				"offset" ~~> offset,
-				"order_by" ~~> sortedBy
+				"order" ~~> sortedBy,
+				"filter" ~~> conditions,
 		])
 		
-		if conditions == nil {
-			return json
-		} else if var json = json {
-			json += conditions!
-			return json
-		} else {
-			return conditions
-		}
 	}
 }
 
@@ -60,7 +53,8 @@ public struct CRUDConfiguration {
 			path: String,
 			method: Alamofire.Method = .GET,
 			parameters: [String: AnyObject]? = nil,
-			encoder: Alamofire.ParameterEncoding = .URL) -> NSMutableURLRequest? {
+			encoder: Alamofire.ParameterEncoding = .URL,
+			cache: NSURLRequestCachePolicy = .UseProtocolCachePolicy) -> NSMutableURLRequest? {
 		
 		guard let modelURL = url?.URLByAppendingPathComponent(path) else {
 			return nil
@@ -69,6 +63,7 @@ public struct CRUDConfiguration {
 		let request = NSMutableURLRequest(URL: modelURL)
 		
 		request.HTTPMethod = method.rawValue
+		request.cachePolicy = cache
 		
 		if let customHeaders = customHeaders {
 			customHeaders().forEach {
@@ -251,7 +246,10 @@ public func all<T:CRUDModel>(limit limit: Int? = nil,
 		promise.reject(Error.incorrectURI); return promise
 	}
 	
-	Alamofire.request(request).responseJSON(completionHandler: objectsResponse(
+	let r = Alamofire.request(request)
+	debugPrint(r)
+					
+	r.responseJSON(completionHandler: objectsResponse(
 			onSuccess: {
 				(objs: [T]) in
 				promise.resolve(objs)
@@ -380,34 +378,97 @@ public func create<T:CRUDModel>(object: T) -> Promise<T> {
 	return promise
 }
 
+public func head<T:CRUDModel>(type: T.Type,
+                 limit limit: Int? = nil,
+                 offset: Int? = nil,
+                 sortedBy: [String]? = nil,
+                 conditions: [String: AnyObject]? = nil)
+	-> Promise<[NSObject: AnyObject]> {
+		let promise = Promise<[NSObject: AnyObject]>()
+		
+		let parameters = Parameters(limit: limit, offset: offset,
+		                            conditions: conditions, sortedBy: sortedBy)
+		
+		guard let request = defaultConfiguration.defaultRequestWithPath(
+			T.path,
+			method: .HEAD,
+			parameters: parameters.toJSON()) else {
+				promise.reject(Error.incorrectURI); return promise
+		}
+		
+		let r = Alamofire.request(request)
+		debugPrint(r)
+		
+		r.responseString(completionHandler: simpleResponse(
+			onSuccess: {
+				(_, headers) in
+				promise.resolve(headers)
+				return true
+			},
+			onError: {
+				promise.reject($0)
+		}))
+		
+		return promise
+}
+
+
 // MARK: - Alamofire Helper func
 
 private func simpleResponse(
-		onSuccess onSuccess: ((AnyObject?) -> Bool),
-		onError: ((Error) -> Void)?)
-				-> Response<AnyObject, NSError> -> Void {
-	return {
-		response in
-		
-		if let error = response.result.error {
-			onError?(Error(error: error))
-			return
-		}
-		
-		let data = response.result.value!
-		if let json = data as? [JSON] {
+	onSuccess onSuccess: ((String, [NSObject: AnyObject]) -> Bool),
+	          onError: ((Error) -> Void)?)
+	-> Response<String, NSError> -> Void {
+		return {
+			response in
 			
-			let errors = [Error].fromJSONArray(json)
-			if errors.count != 0  {
-				onError?(errors[0])
+			if let error = response.result.error {
+				onError?(Error(error: error))
 				return
 			}
+			
+			let data = response.result.value!
+			if let json = data as? [JSON] {
+				
+				let errors = [Error].fromJSONArray(json)
+				if errors.count != 0  {
+					onError?(errors[0])
+					return
+				}
+			}
+			
+			if !onSuccess(data, response.response!.allHeaderFields) {
+				onError?(.incorrectJsonStruct)
+			}
 		}
-		
-		if !onSuccess(data) {
-			onError?(.incorrectJsonStruct)
+}
+
+private func simpleResponse(
+	onSuccess onSuccess: ((AnyObject?, [String: String]) -> Bool),
+	          onError: ((Error) -> Void)?)
+	-> Response<AnyObject, NSError> -> Void {
+		return {
+			response in
+			
+			if let error = response.result.error {
+				onError?(Error(error: error))
+				return
+			}
+			
+			let data = response.result.value!
+			if let json = data as? [JSON] {
+				
+				let errors = [Error].fromJSONArray(json)
+				if errors.count != 0  {
+					onError?(errors[0])
+					return
+				}
+			}
+			
+			if !onSuccess(data, response.response!.allHeaderFields as! [String: String]) {
+				onError?(.incorrectJsonStruct)
+			}
 		}
-	}
 }
 
 private func objectResponse<T: Decodable>(
@@ -416,7 +477,7 @@ private func objectResponse<T: Decodable>(
 				-> Response<AnyObject, NSError> -> Void {
 	return simpleResponse(
 			onSuccess: {
-				data in
+				data, _ in
 				
 				guard let json = data as? JSON else { return false }
 				guard let obj = T(json: json) else { return false }
@@ -434,7 +495,7 @@ private func objectsResponse<T: Decodable>(
 				-> Response<AnyObject, NSError> -> Void {
 	return simpleResponse(
 			onSuccess: {
-				data in
+				data, _ in
 				
 				guard let json = data as? [JSON] else { return false }
 				let obj = [T].fromJSONArray(json)
@@ -449,4 +510,8 @@ private func += <K, V> (inout left: [K:V], right: [K:V]) {
 	for (k, v) in right {
 		left.updateValue(v, forKey: k)
 	}
+}
+
+public func pack(int: Int?) -> String {
+	return int.map { String($0) } ?? "null"
 }
