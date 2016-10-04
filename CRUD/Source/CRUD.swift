@@ -44,25 +44,25 @@ public struct CRUDConfiguration {
 	
 	public var customHeaders: (() -> [String: String])? = nil
 	
-	private var url: NSURL? {
-		guard let url = NSURL(string: baseURL) else { return nil }
+	fileprivate var url: URL? {
+		guard let url = URL(string: baseURL) else { return nil }
 		return url
 	}
 	
-	private func defaultRequestWithPath(
-			path: String,
-			method: Alamofire.Method = .GET,
-			parameters: [String: AnyObject]? = nil,
-			encoder: Alamofire.ParameterEncoding = .URL,
-			cache: NSURLRequestCachePolicy = .UseProtocolCachePolicy) -> NSMutableURLRequest? {
+	fileprivate func defaultRequestWithPath(
+			_ path: String,
+			method: Alamofire.HTTPMethod = .get,
+			parameters: [String: Any]? = nil,
+			encoder: Alamofire.ParameterEncoding = URLEncoding.methodDependent,
+			cache: URLRequest.CachePolicy = .useProtocolCachePolicy) -> URLRequest? {
 		
-		guard let modelURL = url?.URLByAppendingPathComponent(path) else {
+		guard let modelURL = url?.appendingPathComponent(path) else {
 			return nil
 		}
 		
-		let request = NSMutableURLRequest(URL: modelURL)
+		var request = URLRequest(url: modelURL)
 		
-		request.HTTPMethod = method.rawValue
+		request.httpMethod = method.rawValue
 		request.cachePolicy = cache
 		
 		if let customHeaders = customHeaders {
@@ -72,7 +72,7 @@ public struct CRUDConfiguration {
 			}
 		}
 		
-		return encoder.encode(request, parameters: parameters).0
+		return try! encoder.encode(request, with: parameters)
 	}
 }
 
@@ -84,13 +84,13 @@ public var defaultConfiguration: CRUDConfiguration = {
 /// specified primary key that matches any supplied options.
 ///
 /// - Parameter id: target id
-public func find<T:CRUDModel>(id: Int) -> Promise<T> {
+public func find<T:CRUDModel>(_ id: Int) -> Promise<T> {
 	let promise = Promise<T>()
 	
 	let path = T.path + "/\(id)"
 	
 	guard let request = defaultConfiguration.defaultRequestWithPath(path) else {
-		promise.reject(Error.incorrectURI); return promise
+		promise.reject(CRUDError.incorrectURI); return promise
 	}
 	
 	Alamofire.request(request).responseJSON(completionHandler: objectResponse(
@@ -110,8 +110,8 @@ public func find<T:CRUDModel>(id: Int) -> Promise<T> {
 /// specified primary keys that matches any supplied options.
 ///
 /// - Parameter ids: target ids
-public func find<T:CRUDModel>(ids: [Int]) -> Promise<[T]> {
-	return all(conditions: ["id": ids])
+public func find<T:CRUDModel>(_ ids: [Int]) -> Promise<[T]> {
+	return all(conditions: ["id": ids as AnyObject])
 }
 
 /// The 'take' method retrieves a record without any implicit ordering.
@@ -122,7 +122,7 @@ public func take<T:CRUDModel>() -> Promise<T?> {
 /// The 'take' method retrieves a records without any implicit ordering.
 ///
 /// - Parameter count: number of retrieving records
-public func take<T:CRUDModel>(count: Int) -> Promise<[T]> {
+public func take<T:CRUDModel>(_ count: Int) -> Promise<[T]> {
 	return all(limit: count)
 }
 
@@ -134,7 +134,7 @@ public func take<T:CRUDModel>(count: Int) -> Promise<[T]> {
 ///
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
 /// - Parameter conditions: hash for filtering records
-public func first<T:CRUDModel>(conditions: [String: AnyObject]? = nil,
+public func first<T:CRUDModel>(_ conditions: [String: AnyObject]? = nil,
                                sortedBy: [String] = ["id"])
 				-> Promise<T?> {
 	return first(1, conditions: conditions, sortedBy: sortedBy).then { $0.first }
@@ -149,7 +149,7 @@ public func first<T:CRUDModel>(conditions: [String: AnyObject]? = nil,
 /// - Parameter count: count of records
 /// - Parameter conditions: hash for filtering records
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
-public func first<T:CRUDModel>(count: Int,
+public func first<T:CRUDModel>(_ count: Int,
                                conditions: [String: AnyObject]? = nil,
                                sortedBy: [String] = ["id"])
 				-> Promise<[T]> {
@@ -165,7 +165,7 @@ public func first<T:CRUDModel>(count: Int,
 ///
 /// - Parameter conditions: hash for filtering records
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
-public func last<T:CRUDModel>(conditions: [String: AnyObject]? = nil,
+public func last<T:CRUDModel>(_ conditions: [String: AnyObject]? = nil,
                               sortedBy: [String] = ["id"])
 				-> Promise<T?> {
 	return last(1, conditions: conditions, sortedBy: sortedBy).then { $0.first }
@@ -180,7 +180,7 @@ public func last<T:CRUDModel>(conditions: [String: AnyObject]? = nil,
 /// - Parameter count: count of records
 /// - Parameter conditions: hash for filtering records
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
-public func last<T:CRUDModel>(count: Int,
+public func last<T:CRUDModel>(_ count: Int,
                               conditions: [String: AnyObject]? = nil,
                               sortedBy: [String] = ["id"]) -> Promise<[T]> {
 	return all(limit: count, sortedBy: sortedBy.map { $0 + "" + ".desc"},
@@ -190,7 +190,7 @@ public func last<T:CRUDModel>(count: Int,
 /// The 'findBy' method finds the first record matching some conditions.
 ///
 /// - Parameter conditions: find conditions
-public func findBy<T:CRUDModel>(conditions: [String: AnyObject])
+public func findBy<T:CRUDModel>(_ conditions: [String: AnyObject])
 				-> Promise<T?> {
 	return wherein(conditions).then { $0.first }
 }
@@ -201,7 +201,7 @@ public func findBy<T:CRUDModel>(conditions: [String: AnyObject])
 /// - Parameter count: count of record
 /// - Parameter offset: offset of first received record
 /// - Parameter sortedBy: array of fields name for sorting
-public func wherein<T:CRUDModel>(conditions: [String: AnyObject],
+public func wherein<T:CRUDModel>(_ conditions: [String: AnyObject],
                                  count: Int? = nil,
                                  offset: Int? = nil,
                                  sortedBy: [String]? = nil) -> Promise<[T]> {
@@ -231,7 +231,7 @@ public func order<T:CRUDModel>(by order: [String],
 /// - Parameter count: count of record
 /// - Parameter offset: offset of first received record
 /// - Parameter conditions: find conditions
-public func all<T:CRUDModel>(limit limit: Int? = nil,
+public func all<T:CRUDModel>(limit: Int? = nil,
                              offset: Int? = nil,
                              sortedBy: [String]? = nil,
                              conditions: [String: AnyObject]? = nil)
@@ -243,7 +243,7 @@ public func all<T:CRUDModel>(limit limit: Int? = nil,
 	
 	guard let request = defaultConfiguration.defaultRequestWithPath(
 			T.path, parameters: parameters.toJSON()) else {
-		promise.reject(Error.incorrectURI); return promise
+		promise.reject(CRUDError.incorrectURI); return promise
 	}
 	
 	let r = Alamofire.request(request)
@@ -261,18 +261,18 @@ public func all<T:CRUDModel>(limit limit: Int? = nil,
 	return promise
 }
 
-public func destroy<T:CRUDModel>(object: T) -> Promise<T?> {
+public func destroy<T:CRUDModel>(_ object: T) -> Promise<T?> {
 	let promise = Promise<T?>()
 	
 	guard let id = object.id else {
-		promise.reject(Error.objectDoesNotExist); return promise
+		promise.reject(CRUDError.objectDoesNotExist); return promise
 	}
 	
 	let path = T.path + "/\(id)"
 	
 	guard let request = defaultConfiguration.defaultRequestWithPath(
-			path, method: .DELETE) else {
-		promise.reject(Error.incorrectURI); return promise
+			path, method: .delete) else {
+		promise.reject(CRUDError.incorrectURI); return promise
 	}
 	
 	Alamofire.request(request).responseJSON(completionHandler: simpleResponse(
@@ -288,29 +288,29 @@ public func destroy<T:CRUDModel>(object: T) -> Promise<T?> {
 	return promise
 }
 
-public func save<T:CRUDModel>(object: T) -> Promise<T> {
+public func save<T:CRUDModel>(_ object: T) -> Promise<T> {
 	if object.id != nil { return update(object) }
 	else { return create(object) }
 }
 
-public func update<T:CRUDModel>(object: T, oldObject: T? = nil) -> Promise<T> {
+public func update<T:CRUDModel>(_ object: T, oldObject: T? = nil) -> Promise<T> {
 	let promise = Promise<T>()
 	
 	guard let id = object.id else {
-		promise.reject(Error.objectDoesNotExist); return promise
+		promise.reject(CRUDError.objectDoesNotExist); return promise
 	}
 	
 	let path = T.path + "/\(id)"
 	
 	let parameters: JSON?
-	if let objectJSON = object.toJSON(), oldObjectJSON = oldObject?.toJSON() {
+	if let objectJSON = object.toJSON(), let oldObjectJSON = oldObject?.toJSON() {
 		var tempParameters: JSON = [:]
 		
 		oldObjectJSON.forEach {
 			key, value in
 			if objectJSON[key] == nil {
 				tempParameters[key] = NSNull()
-			} else if objectJSON[key]?.isEqual(value) != true {
+			} else if (objectJSON[key] as AnyObject).isEqual(value) != true {
 				tempParameters[key] = objectJSON[key]
 			}
 		}
@@ -329,10 +329,10 @@ public func update<T:CRUDModel>(object: T, oldObject: T? = nil) -> Promise<T> {
 	
 	guard let request = defaultConfiguration.defaultRequestWithPath(
 			path,
-			method: oldObject == nil ? .PUT : .PATCH,
+			method: oldObject == nil ? .put : .patch,
 			parameters: parameters,
-			encoder: .JSON) else {
-		promise.reject(Error.incorrectURI); return promise
+			encoder: JSONEncoding.default) else {
+		promise.reject(CRUDError.incorrectURI); return promise
 	}
 	
 	Alamofire.request(request).responseJSON(completionHandler: objectResponse(
@@ -347,19 +347,19 @@ public func update<T:CRUDModel>(object: T, oldObject: T? = nil) -> Promise<T> {
 	return promise
 }
 
-public func create<T:CRUDModel>(object: T) -> Promise<T> {
+public func create<T:CRUDModel>(_ object: T) -> Promise<T> {
 	let promise = Promise<T>()
 	
 	guard object.id == nil else {
-		promise.reject(Error.objectAlreadyExist); return promise
+		promise.reject(CRUDError.objectAlreadyExist); return promise
 	}
 	
 	guard let request = defaultConfiguration.defaultRequestWithPath(
 			T.path,
-			method: .POST,
+			method: .post,
 			parameters: object.toJSON(),
-			encoder: .JSON) else {
-		promise.reject(Error.incorrectURI); return promise
+			encoder: JSONEncoding.default) else {
+		promise.reject(CRUDError.incorrectURI); return promise
 	}
 	
 	let r = Alamofire.request(request)
@@ -378,28 +378,28 @@ public func create<T:CRUDModel>(object: T) -> Promise<T> {
 	return promise
 }
 
-public func head<T:CRUDModel>(type: T.Type,
-                 limit limit: Int? = nil,
+public func head<T:CRUDModel>(_ type: T.Type,
+                 limit: Int? = nil,
                  offset: Int? = nil,
                  sortedBy: [String]? = nil,
                  conditions: [String: AnyObject]? = nil)
-	-> Promise<[NSObject: AnyObject]> {
-		let promise = Promise<[NSObject: AnyObject]>()
+	-> Promise<[AnyHashable: Any]> {
+		let promise = Promise<[AnyHashable: Any]>()
 		
 		let parameters = Parameters(limit: limit, offset: offset,
 		                            conditions: conditions, sortedBy: sortedBy)
 		
 		guard let request = defaultConfiguration.defaultRequestWithPath(
 			T.path,
-			method: .HEAD,
+			method: .head,
 			parameters: parameters.toJSON()) else {
-				promise.reject(Error.incorrectURI); return promise
+				promise.reject(CRUDError.incorrectURI); return promise
 		}
 		
 		let r = Alamofire.request(request)
 		debugPrint(r)
 		
-		r.responseString(completionHandler: simpleResponse(
+		r.responseJSON(completionHandler: simpleResponse(
 			onSuccess: {
 				(_, headers) in
 				promise.resolve(headers)
@@ -415,50 +415,46 @@ public func head<T:CRUDModel>(type: T.Type,
 
 // MARK: - Alamofire Helper func
 
-private func simpleResponse(
-	onSuccess onSuccess: ((String, [NSObject: AnyObject]) -> Bool),
-	          onError: ((Error) -> Void)?)
-	-> Response<String, NSError> -> Void {
-		return {
-			response in
-			
-			if let error = response.result.error {
-				onError?(Error(error: error))
-				return
-			}
-			
-			let data = response.result.value!
-			if let json = data as? [JSON] {
-				
-				let errors = [Error].fromJSONArray(json)
-				if errors.count != 0  {
-					onError?(errors[0])
-					return
-				}
-			}
-			
-			if !onSuccess(data, response.response!.allHeaderFields) {
-				onError?(.incorrectJsonStruct)
-			}
-		}
-}
+//private func simpleResponse(
+//	onSuccess: @escaping ((Any, [AnyHashable: Any]) -> Bool),
+//	          onError: ((Error) -> Void)?)
+//	-> (DataResponse<Any>) -> Void {
+//		return {
+//			response in
+//			
+//			if let error = response.result.error {
+//				onError?(error)
+//				return
+//			}
+//			
+//			let data = response.result.value!
+//			if let json = data as? [JSON], let errors = [CRUDError].from(jsonArray: json) {
+//				if errors.count != 0  {
+//					onError?(errors[0])
+//					return
+//				}
+//			}
+//			
+//			if !onSuccess(data, response.response!.allHeaderFields) {
+//				onError?(CRUDError.incorrectJsonStruct)
+//			}
+//		}
+//}
 
 private func simpleResponse(
-	onSuccess onSuccess: ((AnyObject?, [String: String]) -> Bool),
+	onSuccess: @escaping ((Any?, [String: String]) -> Bool),
 	          onError: ((Error) -> Void)?)
-	-> Response<AnyObject, NSError> -> Void {
+	-> (DataResponse<Any>) -> Void {
 		return {
 			response in
 			
 			if let error = response.result.error {
-				onError?(Error(error: error))
+				onError?(error)
 				return
 			}
 			
 			let data = response.result.value!
-			if let json = data as? [JSON] {
-				
-				let errors = [Error].fromJSONArray(json)
+			if let json = data as? [JSON], let errors = [CRUDError].from(jsonArray: json) {
 				if errors.count != 0  {
 					onError?(errors[0])
 					return
@@ -466,15 +462,15 @@ private func simpleResponse(
 			}
 			
 			if !onSuccess(data, response.response!.allHeaderFields as! [String: String]) {
-				onError?(.incorrectJsonStruct)
+				onError?(CRUDError.incorrectJsonStruct)
 			}
 		}
 }
 
 private func objectResponse<T: Decodable>(
-		onSuccess onSuccess: ((T) -> Void)?,
+		onSuccess: ((T) -> Void)?,
 		onError: ((Error) -> Void)?)
-				-> Response<AnyObject, NSError> -> Void {
+				-> (DataResponse<Any>) -> Void {
 	return simpleResponse(
 			onSuccess: {
 				data, _ in
@@ -490,15 +486,16 @@ private func objectResponse<T: Decodable>(
 
 
 private func objectsResponse<T: Decodable>(
-		onSuccess onSuccess: (([T]) -> Void)?,
+		onSuccess: (([T]) -> Void)?,
 		onError: ((Error) -> Void)?)
-				-> Response<AnyObject, NSError> -> Void {
+				-> (DataResponse<Any>) -> Void {
 	return simpleResponse(
 			onSuccess: {
 				data, _ in
 				
-				guard let json = data as? [JSON] else { return false }
-				let obj = [T].fromJSONArray(json)
+				guard let json = data as? [JSON], let obj = [T].from(jsonArray: json) else {
+					return false
+				}
 				
 				onSuccess?(obj)
 				
@@ -506,12 +503,12 @@ private func objectsResponse<T: Decodable>(
 			}, onError: onError)
 }
 
-private func += <K, V> (inout left: [K:V], right: [K:V]) {
+private func += <K, V> (left: inout [K:V], right: [K:V]) {
 	for (k, v) in right {
 		left.updateValue(v, forKey: k)
 	}
 }
 
-public func pack(int: Int?) -> String {
+public func pack(_ int: Int?) -> String {
 	return int.map { String($0) } ?? "null"
 }

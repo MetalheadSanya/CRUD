@@ -9,7 +9,7 @@
 import Foundation
 import Gloss
 
-public enum Error: ErrorType, Decodable {
+public enum CRUDError: Error, Decodable {
 	case incorrectURI
 	case objectDoesNotExist
 	case objectAlreadyExist
@@ -38,7 +38,7 @@ public enum Error: ErrorType, Decodable {
 		case let .custom(_, domain, _):
 			return domain
 		default:
-			return Error.appDomain
+			return CRUDError.appDomain
 		}
 	}
 	
@@ -80,8 +80,8 @@ public enum Error: ErrorType, Decodable {
 		}
 	}
 	
-	private static var appDomain: String {
-		if let bundleIdentifier = NSBundle.mainBundle().bundleIdentifier {
+	fileprivate static var appDomain: String {
+		if let bundleIdentifier = Bundle.main.bundleIdentifier {
 			return bundleIdentifier
 		} else {
 			return "com.alexanderZalutskiy.CRUD"
