@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'CRUD'
-  spec.version = '1.1.3'
+  spec.version = '1.1.5'
   spec.summary = 'Simple framework for work with REST API in ActiveRecord style'
   spec.homepage = 'https://github.com/MetalheadSanya/CRUD'
   spec.license = { type: 'BSD', file: 'LICENSE.md' }
