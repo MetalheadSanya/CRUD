@@ -16,11 +16,11 @@ public protocol CRUDModel: Decodable, Encodable {
 private struct Parameters: Encodable {
 	let limit: Int?
 	let offset: Int?
-	let conditions: [String: AnyObject]?
+	let conditions: [String: Any]?
 	let sortedBy: [String]?
 	
 	init(limit: Int? = nil, offset: Int? = nil,
-	     conditions: [String: AnyObject]? = nil, sortedBy: [String]? = nil) {
+	     conditions: [String: Any]? = nil, sortedBy: [String]? = nil) {
 		self.limit = limit
 		self.offset = offset
 		self.conditions = conditions
@@ -134,7 +134,7 @@ public func take<T:CRUDModel>(_ count: Int) -> Promise<[T]> {
 ///
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
 /// - Parameter conditions: hash for filtering records
-public func first<T:CRUDModel>(_ conditions: [String: AnyObject]? = nil,
+public func first<T:CRUDModel>(_ conditions: [String: Any]? = nil,
                                sortedBy: [String] = ["id"])
 				-> Promise<T?> {
 	return first(1, conditions: conditions, sortedBy: sortedBy).then { $0.first }
@@ -150,7 +150,7 @@ public func first<T:CRUDModel>(_ conditions: [String: AnyObject]? = nil,
 /// - Parameter conditions: hash for filtering records
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
 public func first<T:CRUDModel>(_ count: Int,
-                               conditions: [String: AnyObject]? = nil,
+                               conditions: [String: Any]? = nil,
                                sortedBy: [String] = ["id"])
 				-> Promise<[T]> {
 	return all(limit: count, sortedBy: sortedBy.map { $0 + "" + ".asc"},
@@ -165,7 +165,7 @@ public func first<T:CRUDModel>(_ count: Int,
 ///
 /// - Parameter conditions: hash for filtering records
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
-public func last<T:CRUDModel>(_ conditions: [String: AnyObject]? = nil,
+public func last<T:CRUDModel>(_ conditions: [String: Any]? = nil,
                               sortedBy: [String] = ["id"])
 				-> Promise<T?> {
 	return last(1, conditions: conditions, sortedBy: sortedBy).then { $0.first }
@@ -181,7 +181,7 @@ public func last<T:CRUDModel>(_ conditions: [String: AnyObject]? = nil,
 /// - Parameter conditions: hash for filtering records
 /// - Parameter sorted: the array of keys for sorting. Default: '["id"]'
 public func last<T:CRUDModel>(_ count: Int,
-                              conditions: [String: AnyObject]? = nil,
+                              conditions: [String: Any]? = nil,
                               sortedBy: [String] = ["id"]) -> Promise<[T]> {
 	return all(limit: count, sortedBy: sortedBy.map { $0 + "" + ".desc"},
 			conditions: conditions)
@@ -190,7 +190,7 @@ public func last<T:CRUDModel>(_ count: Int,
 /// The 'findBy' method finds the first record matching some conditions.
 ///
 /// - Parameter conditions: find conditions
-public func findBy<T:CRUDModel>(_ conditions: [String: AnyObject])
+public func findBy<T:CRUDModel>(_ conditions: [String: Any])
 				-> Promise<T?> {
 	return wherein(conditions).then { $0.first }
 }
@@ -201,7 +201,7 @@ public func findBy<T:CRUDModel>(_ conditions: [String: AnyObject])
 /// - Parameter count: count of record
 /// - Parameter offset: offset of first received record
 /// - Parameter sortedBy: array of fields name for sorting
-public func wherein<T:CRUDModel>(_ conditions: [String: AnyObject],
+public func wherein<T:CRUDModel>(_ conditions: [String: Any],
                                  count: Int? = nil,
                                  offset: Int? = nil,
                                  sortedBy: [String]? = nil) -> Promise<[T]> {
@@ -219,7 +219,7 @@ public func wherein<T:CRUDModel>(_ conditions: [String: AnyObject],
 public func order<T:CRUDModel>(by order: [String],
                                count: Int? = nil,
                                offset: Int? = nil,
-                               conditions: [String: AnyObject]? = nil)
+                               conditions: [String: Any]? = nil)
 				-> Promise<[T]> {
 	return all(limit: count, offset: offset, sortedBy: order,
 			conditions: conditions)
@@ -234,7 +234,7 @@ public func order<T:CRUDModel>(by order: [String],
 public func all<T:CRUDModel>(limit: Int? = nil,
                              offset: Int? = nil,
                              sortedBy: [String]? = nil,
-                             conditions: [String: AnyObject]? = nil)
+                             conditions: [String: Any]? = nil)
 				-> Promise<[T]> {
 	let promise = Promise<[T]>()
 	
@@ -382,7 +382,7 @@ public func head<T:CRUDModel>(_ type: T.Type,
                  limit: Int? = nil,
                  offset: Int? = nil,
                  sortedBy: [String]? = nil,
-                 conditions: [String: AnyObject]? = nil)
+                 conditions: [String: Any]? = nil)
 	-> Promise<[AnyHashable: Any]> {
 		let promise = Promise<[AnyHashable: Any]>()
 		
